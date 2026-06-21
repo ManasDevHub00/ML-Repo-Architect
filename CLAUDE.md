@@ -1,4 +1,4 @@
-# 🧠 AI System Configuration & Prompts
+ # 🧠 AI System Configuration & Prompts
 
 This project heavily utilized advanced LLMs (like Claude 3.5 Sonnet and Gemini) as the primary reasoning engines for our "Vibe Coding" methodology.
 
