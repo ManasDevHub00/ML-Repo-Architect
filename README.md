@@ -1,21 +1,56 @@
-Markdown
-# ML-Repo-Architect 🚀
+ # ML-Repo-Architect 🚀
 
 > **🏆 Kaggle - Google 5-Day AI Agents: Intensive Vibe Coding Course Hackathon Capstone Project**
-> 
+>
 > **Developer:** Manas Sharma
 
-## 💡 Why This Project Was Built
+---
 
-Writing documentation is often the most tedious part of software development. **ML-Repo-Architect** was created to automate this process. It features an autonomous AI agent designed to read complex codebases, analyze the directory structure, and automatically generate clean, production-grade documentation. This allows developers to focus purely on "vibe coding" and building, while the AI agent handles the technical writing.
+# 💡 Why This Project Was Built
 
-## 📌 Overview
+Writing documentation is often one of the most tedious parts of software development. **ML-Repo-Architect** was created to automate this process.
 
-This repository appears to host a Next.js application, potentially designed for interacting with or serving Machine Learning models or AI agents. It includes API routes for generation tasks, client-side components, and some utility scripts, alongside documentation related to AI agents.
+It features an autonomous AI agent capable of:
 
-## 📂 Project Structure
+* Reading complex codebases
+* Understanding project structure
+* Analyzing files and dependencies
+* Generating clean, production-grade documentation automatically
 
-The project is structured as follows:
+This allows developers to focus on building and "vibe coding" while the AI handles the documentation workload.
+
+---
+
+# 📌 Overview
+
+ML-Repo-Architect is an AI-powered documentation generator built using Next.js and AI agent technologies.
+
+The application analyzes repositories, understands their architecture, and automatically generates structured README files and project documentation.
+
+The project includes:
+
+* Next.js frontend
+* API routes for AI-powered generation
+* MCP (Model Context Protocol) integrations
+* Repository analysis utilities
+* AI agent documentation and workflows
+
+---
+
+# ✨ Features
+
+* 🤖 Autonomous AI Documentation Generation
+* 📂 Repository Structure Analysis
+* 📝 Automated README Creation
+* 🔍 Codebase Understanding
+* ⚡ Next.js Powered Frontend
+* 🔗 GitHub Integration via MCP
+* 📁 Filesystem Access via MCP
+* 🚀 Production-Ready Documentation Output
+
+---
+
+# 📂 Project Structure
 
 ```text
 .
@@ -46,66 +81,226 @@ The project is structured as follows:
     ├── next.svg
     ├── vercel.svg
     └── window.svg
-Key Components:
-app/: This directory contains the main Next.js application.
+```
 
-app/api/generate/route.js: An API endpoint, likely used for handling generation requests, possibly interfacing with a machine learning model or an AI agent.
+---
 
-app/page.js: The main page component of the Next.js application.
+# 🔍 Key Components
 
-app/layout.js: The root layout for the Next.js application.
+## app/
 
-fibonacci.py: A standalone Python script, possibly for demonstration, testing, or a utility function.
+Contains the main Next.js application.
 
-AGENTS.md: Documentation or notes related to AI agents.
+### app/api/generate/route.js
 
-CLAUDE.md: Documentation or notes potentially specific to the Claude AI model.
+API endpoint responsible for handling generation requests and interacting with AI models.
 
-lib/: Contains utility scripts, likely related to custom server integrations (filesystem-mcp-server.mjs, github-mcp-server.mjs).
+### app/page.js
 
-public/: Stores static assets such as images (.svg files).
+Main user interface page of the application.
 
-🚀 Setup Instructions
-To get this project up and running on your local machine, follow these steps:
+### app/layout.js
 
-Prerequisites
-Node.js (LTS version recommended)
+Root layout configuration for the Next.js application.
 
-npm or yarn
+---
 
-Installation
-Clone the repository:
+## lib/
 
-Bash
-git clone [https://github.com/ManasDevHub00/ML-Repo-Architect.git](https://github.com/ManasDevHub00/ML-Repo-Architect.git)
+Contains utility services and MCP integrations.
+
+### filesystem-mcp-server.mjs
+
+Provides filesystem access for repository analysis.
+
+### github-mcp-server.mjs
+
+Provides GitHub integration capabilities.
+
+---
+
+## AGENTS.md
+
+Documentation related to AI agents and workflows used within the project.
+
+---
+
+## CLAUDE.md
+
+Documentation and notes related to Claude AI integration.
+
+---
+
+## fibonacci.py
+
+Sample Python script included for testing, demonstrations, or utility purposes.
+
+---
+
+## public/
+
+Stores static assets such as SVG icons and images.
+
+---
+
+# 🚀 Setup Instructions
+
+## Prerequisites
+
+Before getting started, ensure you have:
+
+* Node.js (LTS Version Recommended)
+* npm or yarn
+
+---
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/ManasDevHub00/ML-Repo-Architect.git
 cd ML-Repo-Architect
-Install dependencies:
+```
 
-Bash
+### 2. Install Dependencies
+
+Using npm:
+
+```bash
 npm install
-# or
+```
+
+Or using yarn:
+
+```bash
 yarn install
-Running the Development Server
-To start the Next.js development server:
+```
 
-Bash
+---
+
+# ▶️ Running the Development Server
+
+Start the Next.js development server:
+
+Using npm:
+
+```bash
 npm run dev
-# or
+```
+
+Using yarn:
+
+```bash
 yarn dev
-Open http://localhost:3000 with your browser to see the result. You can start editing the page by modifying app/page.js. The page auto-updates as you edit the file.
+```
 
-Building for Production
-To build the application for production:
+Open:
 
-Bash
+```text
+http://localhost:3000
+```
+
+in your browser to view the application.
+
+You can begin editing the project by modifying:
+
+```text
+app/page.js
+```
+
+The page will automatically refresh as changes are made.
+
+---
+
+# 🏗️ Building for Production
+
+Create an optimized production build:
+
+Using npm:
+
+```bash
 npm run build
-# or
-yarn build
-Then, to start the production server:
+```
 
-Bash
+Using yarn:
+
+```bash
+yarn build
+```
+
+---
+
+# 🚀 Start Production Server
+
+After building:
+
+Using npm:
+
+```bash
 npm run start
-# or
+```
+
+Using yarn:
+
+```bash
 yarn start
-🛠️ Usage
-This application is a Next.js project. You can interact with its user interface by navigating to the local development server URL. The app/api/generate/route.js suggests an API for generation tasks. Depending on the implementation, you might interact with this API directly or through the provided front-end.
+```
+
+---
+
+# 🛠️ Usage
+
+1. Run the application locally.
+2. Open the web interface.
+3. Submit repository information for analysis.
+4. The AI agent scans the repository structure.
+5. Documentation is automatically generated.
+6. Export or use the generated README and project documentation.
+
+The API endpoint located at:
+
+```text
+app/api/generate/route.js
+```
+
+handles AI-powered generation requests and can be accessed either through the frontend interface or programmatically depending on implementation.
+
+---
+
+# 🎯 Use Cases
+
+* Open Source Projects
+* Personal Portfolio Projects
+* Startup Repositories
+* AI Projects
+* Machine Learning Repositories
+* Hackathon Submissions
+* Internal Team Documentation
+
+---
+
+# 🏆 Hackathon Submission
+
+This project was developed as a capstone submission for:
+
+**Google × Kaggle**
+**5-Day AI Agents: Intensive Vibe Coding Course Hackathon**
+
+The goal was to demonstrate how autonomous AI agents can reduce developer workload by automatically generating professional documentation from existing codebases.
+
+---
+
+# 👨‍💻 Developer
+
+**Manas Sharma**
+
+GitHub: https://github.com/ManasDevHub00
+
+---
+
+# 📜 License
+
+This project is open-source and available under the MIT License.
+
+ 
