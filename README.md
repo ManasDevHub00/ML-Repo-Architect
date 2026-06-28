@@ -34,7 +34,8 @@ The project includes:
 * MCP (Model Context Protocol) integrations
 * Repository analysis utilities
 * AI agent documentation and workflows
-
+---
+<img width="1915" height="880" alt="Image" src="https://github.com/user-attachments/assets/2298bfb6-09f3-47b6-8411-af50e70d944d" />
 ---
 ### 🏗️ System Architecture Workflow
 <img width="1536" height="1024" alt="Image" src="https://github.com/user-attachments/assets/6b57ee0b-9e17-47f0-9e37-3b1d58d22063" />
