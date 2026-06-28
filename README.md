@@ -36,6 +36,10 @@ The project includes:
 * AI agent documentation and workflows
 
 ---
+### 🏗️ System Architecture Workflow
+<img width="1536" height="1024" alt="Image" src="https://github.com/user-attachments/assets/6b57ee0b-9e17-47f0-9e37-3b1d58d22063" />
+
+--- 
 
 # ✨ Features
 
