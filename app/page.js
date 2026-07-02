@@ -19,8 +19,48 @@ import {
   FileText,
   Clock,
   Layers,
-  ArrowRight
+  ArrowRight,
+  RefreshCw
 } from "lucide-react";
+
+// Custom CodeBlock component with hover copy button
+const CodeBlock = ({ className, children, ...props }) => {
+  const [copied, setCopied] = useState(false);
+  const match = /language-(\w+)/.exec(className || '');
+  const language = match ? match[1] : '';
+  const codeString = String(children).replace(/\n$/, '');
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(codeString);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative my-4 group">
+      <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1 bg-slate-900/95 border border-slate-700 hover:border-emerald-500/50 p-1.5 rounded-lg text-[10px] font-mono text-slate-300 hover:text-emerald-400 transition-all backdrop-blur cursor-pointer"
+          title="Copy code"
+        >
+          {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+          <span>{copied ? "Copied" : "Copy"}</span>
+        </button>
+      </div>
+      {language && (
+        <div className="absolute -top-3 left-3 bg-slate-900 border border-slate-800 text-[10px] px-2 py-0.5 rounded font-mono text-slate-400 uppercase tracking-wider">
+          {language}
+        </div>
+      )}
+      <pre className="bg-slate-950 border border-slate-800 rounded-xl p-4 pt-6 overflow-x-auto text-xs font-mono text-emerald-400 shadow-inner">
+        <code className={className} {...props}>
+          {children}
+        </code>
+      </pre>
+    </div>
+  );
+};
 
 // Markdown elements custom styling mapping for high-fidelity rendering
 const MarkdownComponents = {
@@ -32,18 +72,10 @@ const MarkdownComponents = {
   ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 text-slate-300 space-y-1.5 text-sm">{children}</ol>,
   li: ({ children }) => <li className="text-slate-300">{children}</li>,
   code: ({ inline, className, children, ...props }) => {
-    const match = /language-(\w+)/.exec(className || '');
-    return !inline && match ? (
-      <div className="relative my-4 group">
-        <div className="absolute -top-3 left-3 bg-slate-900 border border-slate-800 text-[10px] px-2 py-0.5 rounded font-mono text-slate-400 uppercase">
-          {match[1]}
-        </div>
-        <pre className="bg-slate-950 border border-slate-800 rounded-xl p-4 pt-6 overflow-x-auto text-xs font-mono text-emerald-400 shadow-inner">
-          <code className={className} {...props}>
-            {children}
-          </code>
-        </pre>
-      </div>
+    return !inline ? (
+      <CodeBlock className={className} {...props}>
+        {children}
+      </CodeBlock>
     ) : (
       <code className="bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-xs font-mono text-emerald-400" {...props}>
         {children}
@@ -73,6 +105,7 @@ export default function Home() {
   const [logs, setLogs] = useState([]);
   const [savedPath, setSavedPath] = useState("");
   const [copied, setCopied] = useState(false);
+  const [viewMode, setViewMode] = useState("preview"); // "preview" or "raw"
   
   // Loading dynamic text rotation helper
   const [activeLoadingMessage, setActiveLoadingMessage] = useState("Agent is initializing...");
@@ -131,6 +164,30 @@ export default function Home() {
   const removeFile = (name) => {
     setFiles((prev) => prev.filter((f) => f.name !== name));
   };
+
+  const loadLocalReadme = async () => {
+    try {
+      const response = await fetch("/api/readme");
+      const data = await response.json();
+      if (response.ok) {
+        if (data.exists) {
+          setMarkdownOutput(data.content);
+          setSavedPath(data.filePath || "README.md");
+          setError("");
+        } else {
+          setError("No existing README.md found on local disk.");
+        }
+      } else {
+        setError(data.error || "Failed to read local README.md.");
+      }
+    } catch (err) {
+      setError("Error connecting to local server: " + err.message);
+    }
+  };
+
+  useEffect(() => {
+    loadLocalReadme();
+  }, []);
 
   const handleGenerate = async () => {
     if (files.length === 0 && !githubUrl) {
@@ -199,10 +256,10 @@ export default function Home() {
       </header>
 
       {/* Main Split-Screen Panel */}
-      <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:p-8 max-w-8xl mx-auto w-full">
+      <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
         
         {/* Left Column - Inputs */}
-        <section className="lg:col-span-5 flex flex-col gap-6">
+        <section className="lg:col-span-4 flex flex-col gap-6">
           
           {/* Action Input Card */}
           <div className="bg-slate-800/40 border border-slate-700/40 rounded-2xl p-6 backdrop-blur-xl shadow-xl flex flex-col gap-5">
@@ -340,13 +397,41 @@ export default function Home() {
               </div>
             </div>
           )}
+
+          {/* Display compiled Big-O details if returned */}
+          {bigO.length > 0 && (
+            <div className="bg-slate-800/40 border border-slate-700/40 rounded-2xl p-6 backdrop-blur-xl shadow-xl flex flex-col gap-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-2 border-b border-slate-800 pb-2">
+                <Clock className="h-4 w-4 text-emerald-400" />
+                Complexity Analysis (Big-O)
+              </h3>
+              <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-1 scrollbar-thin">
+                {bigO.map((item, idx) => (
+                  <div key={idx} className="bg-slate-950/50 border border-slate-800/80 p-3 rounded-xl text-xs font-mono">
+                    <div className="font-bold text-slate-200 truncate mb-1.5">{item.fileName}</div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] text-slate-500">Time:</span>
+                      <span className="text-emerald-400 font-bold">{item.timeComplexity}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-slate-500">Space:</span>
+                      <span className="text-emerald-400 font-bold">{item.spaceComplexity}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 italic leading-relaxed border-t border-slate-800/40 pt-1.5 mt-1.5">
+                      {item.explanation}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Right Column - Outputs */}
-        <section className="lg:col-span-7 flex flex-col gap-6">
+        <section className="lg:col-span-8 flex flex-col gap-6">
           
           {/* Markdown Content Card */}
-          <div className="bg-slate-800/40 border border-slate-700/40 rounded-2xl p-6 backdrop-blur-xl shadow-xl flex flex-col h-[calc(100vh-12rem)] min-h-[500px]">
+          <div className="bg-slate-800/40 border border-slate-700/40 rounded-2xl p-6 backdrop-blur-xl shadow-xl flex flex-col h-[calc(100vh-7rem)] min-h-[650px] relative transition-all">
             
             {/* Header / Operations toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4 mb-4">
@@ -357,82 +442,101 @@ export default function Home() {
                 </h2>
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
+                {/* Sync Local Disk Button */}
+                <button
+                  onClick={loadLocalReadme}
+                  className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 hover:border-emerald-500 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-300 hover:text-emerald-400 transition-all active:scale-[0.98] cursor-pointer"
+                  title="Load README.md from local disk"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>Sync Local Disk</span>
+                </button>
+
                 {markdownOutput && (
-                  <button
-                    onClick={handleCopy}
-                    className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 hover:border-emerald-500 px-3.5 py-1.5 rounded-lg text-xs font-mono text-slate-300 hover:text-emerald-400 transition-all active:scale-[0.98]"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="h-3.5 w-3.5 text-emerald-400" />
-                        <span>Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-3.5 w-3.5" />
-                        <span>Copy Clipboard</span>
-                      </>
-                    )}
-                  </button>
+                  <>
+                    {/* Preview / Raw Toggle */}
+                    <div className="flex items-center bg-slate-950 border border-slate-800 p-0.5 rounded-lg">
+                      <button
+                        onClick={() => setViewMode("preview")}
+                        className={`px-3 py-1 rounded-md text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                          viewMode === "preview"
+                            ? "bg-slate-800 text-emerald-400 border border-slate-700/50 shadow-sm"
+                            : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        Preview
+                      </button>
+                      <button
+                        onClick={() => setViewMode("raw")}
+                        className={`px-3 py-1 rounded-md text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                          viewMode === "raw"
+                            ? "bg-slate-800 text-emerald-400 border border-slate-700/50 shadow-sm"
+                            : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        Raw
+                      </button>
+                    </div>
+
+                    {/* Copy Button */}
+                    <button
+                      onClick={handleCopy}
+                      className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 hover:border-emerald-500 px-3.5 py-1.5 rounded-lg text-xs font-mono text-slate-300 hover:text-emerald-400 transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" />
+                          <span>Copy Clipboard</span>
+                        </>
+                      )}
+                    </button>
+                  </>
                 )}
               </div>
             </div>
 
             {/* Dynamic Local Save Path alert banner */}
             {savedPath && (
-              <div className="mb-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-xl text-xs font-mono flex items-center justify-between gap-2 animate-fadeIn">
+              <div className="mb-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-xl text-xs font-mono flex items-center justify-between gap-2 animate-fadeIn animate-duration-300">
                 <div className="flex items-center gap-2">
                   <Save className="h-4.5 w-4.5" />
                   <span>Autonomously saved to disk via Local Filesystem MCP:</span>
                 </div>
-                <span className="bg-emerald-950/50 px-2 py-0.5 rounded text-[10px] truncate max-w-xs border border-emerald-800/40">
+                <span className="bg-emerald-950/50 px-2 py-0.5 rounded text-[10px] truncate max-w-xs border border-emerald-800/40 font-bold">
                   {savedPath.split(/[\\\/]/).pop()}
                 </span>
               </div>
             )}
 
-            {/* Display compiled Big-O details if returned */}
-            {bigO.length > 0 && (
-              <div className="mb-6 bg-slate-900/60 border border-slate-800 rounded-xl p-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-2 mb-3">
-                  <Clock className="h-4 w-4 text-emerald-400" />
-                  Analyzed Code Complexity (Big-O)
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {bigO.map((item, idx) => (
-                    <div key={idx} className="bg-slate-950/50 border border-slate-850 p-3 rounded-lg text-xs">
-                      <div className="font-mono font-bold text-slate-200 truncate mb-2">{item.fileName}</div>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] text-slate-500 font-mono">Time Complexity:</span>
-                        <span className="text-emerald-400 font-mono font-bold">{item.timeComplexity}</span>
-                      </div>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-[10px] text-slate-500 font-mono">Space Complexity:</span>
-                        <span className="text-emerald-400 font-mono font-bold">{item.spaceComplexity}</span>
-                      </div>
-                      <div className="text-[10px] text-slate-400 italic font-mono leading-relaxed border-t border-slate-800/40 pt-1.5 mt-1.5">
-                        {item.explanation}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Main markdown scroll viewer */}
-            <div className="flex-1 overflow-y-auto bg-slate-950/40 border border-slate-850 rounded-2xl p-6 font-sans scrollbar-thin">
+            <div className="flex-1 overflow-y-auto bg-slate-950/40 border border-slate-850 rounded-2xl p-6 font-sans scrollbar-thin flex flex-col">
               {markdownOutput ? (
-                <div className="prose prose-invert prose-emerald max-w-none">
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={MarkdownComponents}
-                  >
-                    {markdownOutput}
-                  </ReactMarkdown>
-                </div>
+                viewMode === "preview" ? (
+                  <div className="prose prose-invert prose-emerald max-w-none flex-1">
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={MarkdownComponents}
+                    >
+                      {markdownOutput}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="flex-1 h-full w-full">
+                    <textarea
+                      readOnly
+                      value={markdownOutput}
+                      className="w-full h-full min-h-[450px] bg-transparent border-0 resize-none font-mono text-xs text-slate-300 focus:ring-0 focus:outline-none leading-relaxed outline-none"
+                    />
+                  </div>
+                )
               ) : (
-                <div className="h-full flex flex-col items-center justify-center gap-4 text-slate-500 text-center py-12">
+                <div className="h-full flex-1 flex flex-col items-center justify-center gap-4 text-slate-500 text-center py-12">
                   {loading ? (
                     <>
                       <Loader2 className="h-10 w-10 text-emerald-500 animate-spin" />
